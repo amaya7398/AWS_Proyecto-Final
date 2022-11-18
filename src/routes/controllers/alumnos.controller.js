@@ -42,13 +42,12 @@ module.exports.updateAlumno = (req, res) => {
     if (!alumnoFound) {
         return res.status(404).json({ "Error": "Alumno not found" });
     }
-
     const {
         nombre = alumnoFound.nombre,
         apellido = alumnoFound.apellido,
         promedio = alumnoFound.promedio,
         matricula = alumnoFound.matricula } = req.body;
-    console.log(alumnos[alumnos.indexOf(alumnoFound)]);
+    alumnos[alumnos.indexOf(alumnoFound)] = { ...alumnoFound, nombre, apellido, promedio, matricula };
     res.status(200).json({ nombre, apellido, promedio, matricula });
 
 }
