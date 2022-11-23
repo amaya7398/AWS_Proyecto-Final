@@ -5,6 +5,15 @@ const routeAlumnos = require("./routes/alumnos.routes");
 const routeProfesores = require("./routes/profesores.routes");
 const app = express();
 
+const methodAllowed = (req) => {
+    const reqq = ["GET", "POST", "PUT", "DELETE"];
+    return reqq.includes(req.method);
+}
+const validPath = (req) => {
+    const reqq = ["/alumnos", "/profesores"];
+    return reqq.includes(req.url);
+}
+
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -16,6 +25,15 @@ app.use((req, _, next) => {
 
 //ROUTES
 app.use("/", routeMain);
+app.use((req, res, next) => {
+    if (!methodAllowed(req)) {
+        return res.status(404).json({ "Error": "Method not allowed" });
+    }
+    if (!validPath(req)) {
+        return res.status(404).json({ "Error": "Path not allowed" });
+    }
+    next();
+})
 app.use("/alumnos", routeAlumnos);
 app.use("/profesores", routeProfesores);
 
