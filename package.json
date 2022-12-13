@@ -11,8 +11,14 @@
   "author": "Daniel_Amaya <daniel_amaya7398@hotmail.com>",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.1274.0",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "multer-s3": "^2.5.0",
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.27.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"

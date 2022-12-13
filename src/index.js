@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 const routeAlumnos = require("./routes/alumnos.routes");
 const routeProfesores = require("./routes/profesores.routes");
 const app = express();
@@ -26,7 +27,7 @@ app.use((req, res, next) => {
     next();
 })
 
-const port = process.env.port || 8080;
+const port = process.env.PORT || 8080;
 app.listen(port, () => {
     console.log("server running on port", port);
 });

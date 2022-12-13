@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const alumnosController = require("./controllers/alumnos.controller");
+const { upload } = require("../models/multer");
 
 const router = Router();
 
@@ -7,6 +8,8 @@ const router = Router();
 router.get('/', alumnosController.getAlumnos);
 // #/alumnos => POST            (Crear nuevo alumno)
 router.post("/", alumnosController.createAlumno);
+// #/alumnos/{id}/fotoPerfil => POST
+router.post("/:id/fotoPerfil", upload.single("foto"), alumnosController.uploadFotoPerfil);
 
 // #/alumnos/{id} => GET        (Obtener un alumno por su id)
 router.get('/:id', alumnosController.getAlumnoById);

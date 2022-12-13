@@ -1,6 +1,7 @@
-let alumnos = [];
-const searchById = (id, arreglo) => {
-    return arreglo.find(a => a.id == id);
+const { Alumno } = require("../../models/Alumno");
+
+const searchById = async (id, WhereToSearch) => {
+    return await WhereToSearch.findOne({ where: { id } });
 }
 const validParams = (id, nombre, apellido, matricula, promedio) => {
     return testValidID(id) &&
@@ -15,12 +16,14 @@ module.exports.methodNotAllowed = (_, res) => {
 }
 
 module.exports.getAlumnos = (_, res) => {
-    res.status(200).json({ alumnos });
+    Alumno.findAll().then(alumnos => {
+        res.status(200).json({ alumnos })
+    });
 }
 
-module.exports.getAlumnoById = (req, res) => {
+module.exports.getAlumnoById = async (req, res) => {
     const { id } = req.params;
-    const alumnoFound = searchById(id, alumnos);
+    const alumnoFound = await searchById(id, Alumno);
     if (!alumnoFound) {
         return res.status(404).json({ "Error": "Not Found" });
     }
@@ -29,22 +32,43 @@ module.exports.getAlumnoById = (req, res) => {
 
 module.exports.createAlumno = (req, res) => {
     const { id, nombres, apellidos, matricula, promedio } = req.body;
-    const exist = searchById(matricula, alumnos);
     if (!validParams(id, nombres, apellidos, matricula, promedio)) {
         return res.status(400).json({ "Error": "Invalid Parameters undefined" });
     }
-    if (exist) {
-        return res.status(400).json({ "Error": "Alumno already exist" });
-    }
-    const newAlumno = { id, nombres, apellidos, matricula, promedio };
-    alumnos.push(newAlumno);
-    return res.status(201).json(newAlumno);
+
+    Alumno.create({ id, nombres, apellidos, matricula, promedio })
+        .then(newAlumno => {
+            return res.status(201).json(newAlumno);
+        });
 }
 
-module.exports.updateAlumno = (req, res) => {
+module.exports.uploadFotoPerfil = async (req, res) => {
+    const { id } = req.params;
+    const fileLocation = req.file.location;
+    const status = await Student.update(
+        {
+            fotoPerfilUrl: fileLocation,
+        },
+        {
+            where: {
+                id: id,
+            },
+        }
+    )
+    if (status != 0) {
+        const alumnoFound = await searchById(id, Alumno);
+        if (!alumnoFound) {
+            return res.status(404).json({ "Error": "Not Found" });
+        }
+        return res.status(200).json(alumnoFound);
+    }
+    res.status(500).json(alumnoFound);
+}
+
+module.exports.updateAlumno = async (req, res) => {
     const { id } = req.params;
     const { nombres, apellidos, matricula, promedio } = req.body;
-    const alumnoFound = searchById(id, alumnos);
+    const alumnoFound = await searchById(id, Alumno);
 
     if (!alumnoFound) {
         return res.status(400).json({ "Error": "Alumno not found" });
@@ -53,19 +77,22 @@ module.exports.updateAlumno = (req, res) => {
         return res.status(400).json({ "Error": "Invalid Parameters undefined" });
     }
 
-    alumnos[alumnos.indexOf(alumnoFound)] = { ...alumnoFound, nombres, apellidos, promedio, matricula };
-    return res.status(200).json(alumnoFound);
+    const alumnoEdited = await Alumno.update(
+        { nombres, apellidos, matricula, promedio },
+        { where: { id } }
+    )
+    return res.status(200).json(alumnoEdited);
 
 }
 
-module.exports.deleteAlumno = (req, res) => {
+module.exports.deleteAlumno = async (req, res) => {
     const { id } = req.params;
-    const alumnoFound = searchById(id, alumnos);
+    const alumnoFound = await searchById(id, Alumno);
     if (!alumnoFound) {
         return res.status(404).json({ "Error": "Alumno not found" });
     }
-    alumnos = alumnos.filter(al => al.id != id);
-    return res.status(200).json({ "deleted": alumnoFound });
+    await Alumno.destroy({ where: { id } })
+    return res.status(200).json({ "deleted": alumnoFound })
 }
 
 //module.exports = { getAlumnos }
