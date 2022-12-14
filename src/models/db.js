@@ -11,14 +11,8 @@ const sequelize = new Sequelize(DATABASE, DATABASEUSER, DATABASEPASSWORD, {
     dialect: DATABASEDIALECT,
 });
 
-try {
-    sequelize.authenticate()
-        .then(() => {
-            console.log("Connection has been established successfully.")
-        })
-        .catch(err => { console.error("Unable to connect to the database:", err) });
-} catch (error) {
-    console.error("Unable to connect to the database:", error);
-}
+sequelize.authenticate()
+    .then(() => { console.log("Connection has been established successfully.") })
+    .catch(err => { console.error("Unable to connect to the database:", err) });
 
 module.exports = { sequelize };
