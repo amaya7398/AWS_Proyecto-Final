@@ -1,7 +1,7 @@
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 const { S3BUCKET, S3ACL } = require("./enviroment");
-const { s3 } = require("./s3");
+const { s3 } = require("./S3");
 
 const upload = multer({
     storage: multerS3({
