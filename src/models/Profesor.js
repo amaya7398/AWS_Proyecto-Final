@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require("sequelize");
-const { sequelize } = require("../config/Database");
+const { sequelize } = require("./db");
 
 class Profesor extends Model { }
 

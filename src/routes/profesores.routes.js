@@ -1,13 +1,13 @@
 const { Router } = require("express");
 const profesorController = require("./controllers/profesores.controller");
 
+
 const router = Router();
 
 // GET / profesores
 router.get("/", profesorController.getProfesores);
 // POST / profesores
 router.post("/", profesorController.createProfesor);
-
 
 // GET / profesores / { id }
 router.get("/:id", profesorController.getProfesorById);

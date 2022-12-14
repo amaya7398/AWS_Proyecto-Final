@@ -1,7 +1,7 @@
-let profesores = [];
+const { Profesor } = require('../../models/Profesor');
 
-const searchById = (id, arreglo) => {
-    return arreglo.find(a => a.id == id);
+const searchById = async (id, ORM) => {
+    return await ORM.findOne({ where: { id } });
 }
 
 module.exports.methodNotAllowed = (_, res) => {
@@ -9,13 +9,15 @@ module.exports.methodNotAllowed = (_, res) => {
 }
 
 module.exports.getProfesores = (_, res) => {
-    res.status(200).json({ profesores });
+    Profesor.findAll()
+        .then(profesores => {
+            res.status(200).json({ profesores })
+        });
 }
 
-module.exports.getProfesorById = (req, res) => {
+module.exports.getProfesorById = async (req, res) => {
     const { id } = req.params;
-    const profesorFound = searchById(id, profesores);
-
+    const profesorFound = await searchById(id, Profesor);
     if (!profesorFound) {
         return res.status(404).json({ "Error": "Profesor not found" });
     }
@@ -23,23 +25,21 @@ module.exports.getProfesorById = (req, res) => {
 }
 
 module.exports.createProfesor = (req, res) => {
-    const { id, numeroEmpleado, nombres, apellidos, horasClase } = req.body;
-    const exist = searchById(numeroEmpleado, profesores);
+    const { numeroEmpleado, nombres, apellidos, horasClase } = req.body;
     if (!validParams(numeroEmpleado, nombres, apellidos, horasClase)) {
         return res.status(400).json({ "Error": "Invalid Parameters" });
     }
-    if (exist) {
-        return res.status(400).json({ "Error": "El profesor ya existe" });
-    }
-    const newProfesor = { id, numeroEmpleado, nombres, apellidos, horasClase };
-    profesores.push(newProfesor);
-    res.status(201).json(newProfesor);
+
+    Profesor.create({ numeroEmpleado, nombres, apellidos, horasClase })
+        .then(newProfesor => {
+            return res.status(201).json(newProfesor);
+        });
 }
 
-module.exports.updateProfesor = (req, res) => {
+module.exports.updateProfesor = async (req, res) => {
     const { id } = req.params;
     const { numeroEmpleado, nombres, apellidos, horasClase } = req.body;
-    const profesorFound = searchById(id, profesores);
+    const profesorFound = await searchById(id, Profesor);
 
     if (!profesorFound) {
         return res.status(400).json({ "Error": "Profesor not found" });
@@ -48,17 +48,21 @@ module.exports.updateProfesor = (req, res) => {
         return res.status(400).json({ "Error": "Invalid Parameters" });
     }
 
-    profesores[profesores.indexOf(profesorFound)] = { ...profesorFound, numeroEmpleado, nombres, apellidos, horasClase };
-    res.status(200).json({ id, numeroEmpleado, nombres, apellidos, horasClase });
+    const profesorEdited = await Profesor.update(
+        { numeroEmpleado, nombres, apellidos, horasClase },
+        { where: { id } }
+    )
+    return res.status(200).json(profesorEdited);
+
 }
 
-module.exports.deleteProfesor = (req, res) => {
+module.exports.deleteProfesor = async (req, res) => {
     const { id } = req.params;
-    const profesorFound = searchById(id, profesores);
+    const profesorFound = await searchById(id, Profesor);
     if (!profesorFound) {
         return res.status(404).json({ "Error": "Profesor not found" });
     }
-    profesores = profesores.filter(prof => prof.id != id);
+    await Profesor.destroy({ where: { id } });
     res.status(200).json({ "deleted": profesorFound });
 }
 

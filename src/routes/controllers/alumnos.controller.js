@@ -1,11 +1,10 @@
 const { Alumno } = require("../../models/Alumno");
 
-const searchById = async (id, WhereToSearch) => {
-    return await WhereToSearch.findOne({ where: { id } });
+const searchById = async (id, ORM) => {
+    return await Alumno.findOne({ where: { id } });
 }
-const validParams = (id, nombre, apellido, matricula, promedio) => {
-    return testValidID(id) &&
-        testValidNames(nombre) &&
+const validParams = (nombre, apellido, matricula, promedio) => {
+    return testValidNames(nombre) &&
         testValidNames(apellido) &&
         testValidMatricula(matricula) &&
         testValidAverage(promedio);
@@ -31,12 +30,12 @@ module.exports.getAlumnoById = async (req, res) => {
 }
 
 module.exports.createAlumno = (req, res) => {
-    const { id, nombres, apellidos, matricula, promedio } = req.body;
-    if (!validParams(id, nombres, apellidos, matricula, promedio)) {
+    const { nombres, apellidos, matricula, promedio } = req.body;
+    if (!validParams(nombres, apellidos, matricula, promedio)) {
         return res.status(400).json({ "Error": "Invalid Parameters undefined" });
     }
 
-    Alumno.create({ id, nombres, apellidos, matricula, promedio })
+    Alumno.create({ nombres, apellidos, matricula, promedio })
         .then(newAlumno => {
             return res.status(201).json(newAlumno);
         });
@@ -45,7 +44,7 @@ module.exports.createAlumno = (req, res) => {
 module.exports.uploadFotoPerfil = async (req, res) => {
     const { id } = req.params;
     const fileLocation = req.file.location;
-    const status = await Student.update(
+    const status = await Alumno.update(
         {
             fotoPerfilUrl: fileLocation,
         },
@@ -73,7 +72,7 @@ module.exports.updateAlumno = async (req, res) => {
     if (!alumnoFound) {
         return res.status(400).json({ "Error": "Alumno not found" });
     }
-    if (!validParams(id, nombres, apellidos, matricula, promedio)) {
+    if (!validParams(nombres, apellidos, matricula, promedio)) {
         return res.status(400).json({ "Error": "Invalid Parameters undefined" });
     }
 
@@ -97,10 +96,6 @@ module.exports.deleteAlumno = async (req, res) => {
 
 //module.exports = { getAlumnos }
 
-const testValidID = (idToValidate) => {
-    const regexParaId = new RegExp(/^[0-9]/);
-    return regexParaId.test(idToValidate) ? idToValidate > 0 : false;
-}
 const testValidNames = (textoToValidate) => {
     const regexParaTexto = new RegExp(/^[a-zA-ZÀ-ÿ ]+/);
     return textoToValidate != null ? regexParaTexto.test(textoToValidate) : false;
